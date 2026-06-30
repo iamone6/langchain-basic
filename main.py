@@ -1,3 +1,7 @@
+#
+#   chatbot example
+#
+
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate   # 프롬프트용 템플릿
