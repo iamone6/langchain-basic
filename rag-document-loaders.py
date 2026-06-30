@@ -25,6 +25,7 @@ import openpyxl
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 load_dotenv()
+# WebBaseKLoader의 User-Agent 설정
 os.environ.setdefault("USER_AGENT", "langchain-basic/1.0")
 
 
