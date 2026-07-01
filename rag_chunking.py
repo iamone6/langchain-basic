@@ -64,10 +64,11 @@ class Chunking:
                 )
 
             chunks = splitter.split_text(text)
-            print("CharacterTextSplitter 청킹 개수:", len(chunks), "개")
-            print(f"첫 번째 청크 토큰 수: {count_tokens(chunks[0])}")
+            print("class Chunking: CharacterTextSplitter 청킹 개수:", len(chunks), "개")
+            print(f"class Chunking: 첫 번째 청크 토큰 수: {count_tokens(chunks[0])}")
             return chunks
 
 
-chunking = Chunking(file=file, chunk_type=ChunkType.TOKEN, chunk_size=chunk_size, token_chunk_size=token_chunk_size)
-chunking.split_text()
+if __name__ == "__main__":
+    chunking = Chunking(file=file, chunk_type=ChunkType.TOKEN, chunk_size=chunk_size, token_chunk_size=token_chunk_size)
+    chunking.split_text()

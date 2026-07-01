@@ -42,3 +42,7 @@ htmlcov/
 
 #file
 file/
+
+#vector db
+chroma_db/
+faiss_db/
