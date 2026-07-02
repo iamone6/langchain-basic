@@ -10,7 +10,7 @@
 import os
 from enums.chunk_type import ChunkType
 from rag_chunking import Chunking
-from langchain_huggingface import HuggingFaceEmbeddings
+from utils import embeddings
 
 # cos 유사도 측정을 위해
 from numpy import dot
@@ -20,11 +20,6 @@ import numpy as np
 file: str = "./file/키다리아저씨.txt"
 chunk_size: int = 1000
 token_chunk_size: int = 300
-
-# 한국어 특화 sentence-transformers 모델 (공개 모델, 토큰 불필요)
-embeddings = HuggingFaceEmbeddings( model_name="jhgan/ko-sroberta-multitask",
-                                    model_kwargs={"device": "cpu"},
-                                    encode_kwargs={"normalize_embeddings": True})
 
 chunking = Chunking(file=file, chunk_type=ChunkType.TOKEN, chunk_size=chunk_size, token_chunk_size=token_chunk_size)
 chunks = chunking.split_text()

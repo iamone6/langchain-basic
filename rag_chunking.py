@@ -16,7 +16,7 @@ import os
 from dotenv import load_dotenv
 from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTextSplitter
 from enums.chunk_type import ChunkType
-from tiktoken_utils import count_tokens
+from utils import count_tokens
 
 load_dotenv()
 

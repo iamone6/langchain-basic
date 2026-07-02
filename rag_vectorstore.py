@@ -11,10 +11,9 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from dotenv import load_dotenv
-from tiktoken_utils import count_tokens
+from utils import count_tokens, embeddings
 from enums.chunk_type import ChunkType
 from rag_chunking import Chunking
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.vectorstores import FAISS
 
@@ -22,11 +21,6 @@ from langchain_community.vectorstores import FAISS
 file: str = "./file/키다리아저씨.txt"
 chunk_size: int = 1000
 token_chunk_size: int = 300
-
-# rag_embedding.py 에서 vectors 를 생성하는 부분.
-embeddings = HuggingFaceEmbeddings( model_name="jhgan/ko-sroberta-multitask",
-                                    model_kwargs={"device": "cpu"},
-                                    encode_kwargs={"normalize_embeddings": True})
 
 chunking = Chunking(file=file, chunk_type=ChunkType.TOKEN, chunk_size=chunk_size, token_chunk_size=token_chunk_size)
 # chunks = chunking.split_text()
