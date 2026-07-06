@@ -28,7 +28,7 @@ chunking = Chunking(file=file, chunk_type=ChunkType.TOKEN, chunk_size=chunk_size
 # embed_documents() 는 list[str] 를 받아 list[list[float]] 를 반환 (for loop 불필요)
 # vectors = embeddings.embed_documents(chunks)
 
-# Chroma vector store 에 벡터 저장 (to ./chroma_db)
+# Chroma vector store 에 벡터 저장 (to ./chroma_db) : persist_directory 가 없으면 객체만 리턴된다. (vector store 저장은 persist_directory 지정 필요)
 #   Chroma.from_texts() 는 list[str] 를 받아 list[list[float]] 를 생성하고, vector store 에 저장합니다.
 #   Chroma.from_documents() 는 list[Document] 를 받아 list[list[float]] 를 생성하고, vector store 에 저장합니다.
 vectorDB = Chroma.from_texts(texts=chunking.split_text(),   # list[str] 또는 list[Document] 를 받음(.from_ducuments())

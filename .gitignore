@@ -46,3 +46,4 @@ file/
 #vector db
 chroma_db/
 faiss_db/
+sql_fewshot_db/
