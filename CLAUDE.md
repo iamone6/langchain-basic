@@ -35,6 +35,10 @@ ANTHROPIC_API_KEY=sk-ant-...
 | `rag_embedding.py` | HuggingFace 임베딩 생성 및 코사인 유사도 계산 예제 |
 | `rag_vectorstore.py` | Chroma/FAISS 벡터스토어 저장·검색 예제 |
 | `rag_retrieval.py` | 컨텍스트 체인 4종(Stuff/Map Reduce/Refine/Map Rerank) 예제 |
+| `rag_retriever_advance_multi_query_retriever.py` | MultiQueryRetriever 예제 (질문을 여러 버전으로 확장해 검색) |
+| `rag_retriever_advance_parent_document.py` | ParentDocumentRetriever 예제 (작은 child로 검색, 큰 parent를 컨텍스트로) |
+| `rag_retriever_advance_self_query_retriever.py` | SelfQueryRetriever 예제 (질문에서 metadata 필터 자동 추출) |
+| `rag_retriever_advance_time_weight_retriever.py` | TimeWeightedVectorStoreRetriever 예제 (최근성 가중치 검색) |
 | `sql_agnet.py` | SQL Agent + few-shot 벡터 검색 예제 |
 | `utils.py` | 공용 유틸(토큰 카운터, 임베딩 모델 객체) |
 
@@ -99,6 +103,16 @@ RAG 파이프라인: `DocumentLoaders → TextSplitters → Embedding → Vector
 - **Refine** — 청크를 순차적으로 돌며 이전 답변을 새 컨텍스트로 계속 개선
 - **Map Rerank** — 청크마다 병렬로 (answer, score) 생성 후 최고 score의 answer 채택
 - `enums/chain_type.py`의 `ChainType` enum으로 방식 선택, `Retrieval` 클래스가 `chain_type`에 따라 내부 메서드로 분기
+
+### RAG Retriever 고급 기법 (`rag_retriever_advance_*.py`)
+
+LangChain 1.x에서 `MultiQueryRetriever`/`ParentDocumentRetriever`/`SelfQueryRetriever`/`TimeWeightedVectorStoreRetriever`는 모두 `langchain_classic` 패키지로 이동됨 (`langchain`에 번들되어 있지 않아 `poetry add langchain-classic` 필요, `poetry-add`로 재설치 시 `tokenizers` 버전이 튈 수 있음 — 아래 "알려진 이슈" 참고)
+
+- **MultiQueryRetriever** — 질문 1개를 LLM으로 여러 버전으로 확장(기본 3개) 후 각각 검색, 중복 제거한 합집합 반환. `generate_queries()`/`retrieve_documents()`/`unique_union()`을 직접 호출하면 `invoke()`와 동일한 결과를 얻으면서 생성된 질문 목록도 확인 가능 (`CallbackManagerForRetrieverRun.get_noop_manager()` 사용)
+- **ParentDocumentRetriever** — `child_splitter`(작은 chunk, 검색 정확도용)와 `parent_splitter`(큰 chunk, 컨텍스트용)를 함께 지정. `vectorstore`엔 child만 임베딩되어 저장되고, `docstore`(`InMemoryStore` 등 단순 key-value)엔 parent 원문이 저장됨. child의 metadata에 자동으로 `doc_id`(parent id)가 채워짐. chunking은 `add_documents()` 호출 시 1회만 수행되고, 질문 시점에는 벡터 검색 + id로 parent 조회만 일어남 (재청킹 없음)
+- **SelfQueryRetriever** — 질문을 분석해 "의미 검색 텍스트"와 "metadata 필터(구조화 쿼리)"로 분리 후 필터링+검색을 함께 수행. `AttributeInfo`로 필터 가능한 필드(이름/설명/타입)를 미리 정의해야 함. 구조화 쿼리 파싱에 `lark` 패키지 필요 (`poetry add lark`)
+- **TimeWeightedVectorStoreRetriever** — `score = (1-decay_rate)^경과시간(hour) + semantic_similarity`로, 최근에 추가/조회된 문서일수록 가중치 부여. `add_documents(docs, current_time=...)`로 문서별 삽입 시점을 과거로 시뮬레이션 가능 (단, 한 번의 호출엔 하나의 `current_time`만 적용되므로 실제 문서마다 다른 시각을 쓰려면 호출 전에 각 `Document.metadata["last_accessed_at"]`을 직접 채워야 함). `other_score_keys`에 임의 metadata 필드(예: `access_count`)를 지정하면 그 값이 점수에 가산되어 "많이 참조된 chunk 가중치" 같은 로직도 구현 가능
+- **알려진 이슈**: Chroma는 metadata에 `datetime` 객체 저장 불가(str/int/float/bool/list만 허용) → TimeWeightedVectorStoreRetriever는 `FAISS`(빈 `faiss.IndexFlatL2` + `InMemoryDocstore`)를 사용. `langchain_core.InMemoryVectorStore`는 `_select_relevance_score_fn` 미구현이라 이 retriever와 호환 안 됨. `SelfQueryRetriever.from_llm()`은 translator 자동 감지 시 모든 벡터스토어용 translator를 일괄 import하는데 `langchain-community` 버전에 따라 일부(Databricks) import가 깨질 수 있음 → `structured_query_translator=ChromaTranslator()`로 명시해 우회
 
 ### SQL Agent (`sql_agnet.py`)
 

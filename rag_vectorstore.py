@@ -7,6 +7,7 @@
 #       faiss 로도 동일한 작업을 할 수 있습니다. (poetry add faiss-cpu)
 #
 
+import hashlib
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -23,16 +24,21 @@ chunk_size: int = 1000
 token_chunk_size: int = 300
 
 chunking = Chunking(file=file, chunk_type=ChunkType.TOKEN, chunk_size=chunk_size, token_chunk_size=token_chunk_size)
-# chunks = chunking.split_text()
+chunks = chunking.split_text()
 
 # embed_documents() 는 list[str] 를 받아 list[list[float]] 를 반환 (for loop 불필요)
 # vectors = embeddings.embed_documents(chunks)
 
+# id 를 지정하지 않으면 저장할 때마다 UUID 가 새로 생겨 재실행할 때마다 같은 청크가 중복 저장됩니다.
+# 청크 내용 기반 해시를 id 로 지정해, 재실행 시 같은 청크는 같은 id 로 upsert 되도록 합니다.
+ids = [hashlib.md5(chunk.encode("utf-8")).hexdigest() for chunk in chunks]
+
 # Chroma vector store 에 벡터 저장 (to ./chroma_db) : persist_directory 가 없으면 객체만 리턴된다. (vector store 저장은 persist_directory 지정 필요)
 #   Chroma.from_texts() 는 list[str] 를 받아 list[list[float]] 를 생성하고, vector store 에 저장합니다.
 #   Chroma.from_documents() 는 list[Document] 를 받아 list[list[float]] 를 생성하고, vector store 에 저장합니다.
-vectorDB = Chroma.from_texts(texts=chunking.split_text(),   # list[str] 또는 list[Document] 를 받음(.from_ducuments())
+vectorDB = Chroma.from_texts(texts=chunks,   # list[str] 또는 list[Document] 를 받음(.from_ducuments())
                              embedding=embeddings, # 임베딩 모델 객체
+                             ids=ids,  # 청크 내용 해시 기반 id (재실행 시 중복 저장 방지)
                              persist_directory="./chroma_db")  # vector store 저장 경로
 
 # 질문
