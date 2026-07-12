@@ -31,6 +31,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 |---|---|
 | `main.py` | Claude API 기본 호출, 프롬프트 템플릿, 스트리밍 |
 | `rag-document-loaders.py` | 다양한 포맷의 문서 로딩 예제 |
+| `rag_load_various_file_format.py` | docx/pdf/xlsx/txt/web url 로딩 예제 (포맷별 로딩 방식 정리) |
 | `rag_chunking.py` | 문서 청킹 예제 (글자 수 기준, 토큰 수 기준) |
 | `rag_embedding.py` | HuggingFace 임베딩 생성 및 코사인 유사도 계산 예제 |
 | `rag_vectorstore.py` | Chroma/FAISS 벡터스토어 저장·검색 예제 |
@@ -39,6 +40,8 @@ ANTHROPIC_API_KEY=sk-ant-...
 | `rag_retriever_advance_parent_document.py` | ParentDocumentRetriever 예제 (작은 child로 검색, 큰 parent를 컨텍스트로) |
 | `rag_retriever_advance_self_query_retriever.py` | SelfQueryRetriever 예제 (질문에서 metadata 필터 자동 추출) |
 | `rag_retriever_advance_time_weight_retriever.py` | TimeWeightedVectorStoreRetriever 예제 (최근성 가중치 검색) |
+| `rag_retriever_advance_ensemble_retriever.py` | EnsembleRetriever 예제 (Sparse+Dense 결합 검색) |
+| `rag_retriever_advance_long_context_reorder.py` | LongContextReorder 예제 (Lost in the Middle 대응) |
 | `sql_agnet.py` | SQL Agent + few-shot 벡터 검색 예제 |
 | `utils.py` | 공용 유틸(토큰 카운터, 임베딩 모델 객체) |
 
@@ -65,6 +68,14 @@ RAG 파이프라인: `DocumentLoaders → TextSplitters → Embedding → Vector
 - `CSVLoader` — CSV 로드, 행마다 Document 객체 반환
 
 > `langchain-community` sunset 예고로 DeprecationWarning 발생 — `warnings.filterwarnings("ignore")` 로 숨김
+
+### RAG 다양한 파일 포맷 로딩 (`rag_load_various_file_format.py`)
+
+- **TXT** — 별도 Loader 불필요, `open()`으로 읽어 `Document`로 감싸기만 하면 됨
+- **DOCX** — `Docx2txtLoader.load()`, 워드는 페이지 개념이 없어 전체가 Document 1개로 반환됨
+- **PDF** — `PyPDFLoader.load_and_split()`으로 페이지 단위 분리 (`load()`는 전체를 1개로 반환)
+- **XLSX** — 전용 Loader 없음, `openpyxl`로 직접 읽어 텍스트 변환 후 `Document`로 감쌈
+- **WEB** — `WebBaseLoader`, `os.environ.setdefault("USER_AGENT", ...)`를 **import 전에** 호출해야 경고 안 뜸
 
 ### RAG Chunking (`rag_chunking.py`)
 
@@ -113,6 +124,8 @@ LangChain 1.x에서 `MultiQueryRetriever`/`ParentDocumentRetriever`/`SelfQueryRe
 - **SelfQueryRetriever** — 질문을 분석해 "의미 검색 텍스트"와 "metadata 필터(구조화 쿼리)"로 분리 후 필터링+검색을 함께 수행. `AttributeInfo`로 필터 가능한 필드(이름/설명/타입)를 미리 정의해야 함. 구조화 쿼리 파싱에 `lark` 패키지 필요 (`poetry add lark`)
 - **TimeWeightedVectorStoreRetriever** — `score = (1-decay_rate)^경과시간(hour) + semantic_similarity`로, 최근에 추가/조회된 문서일수록 가중치 부여. `add_documents(docs, current_time=...)`로 문서별 삽입 시점을 과거로 시뮬레이션 가능 (단, 한 번의 호출엔 하나의 `current_time`만 적용되므로 실제 문서마다 다른 시각을 쓰려면 호출 전에 각 `Document.metadata["last_accessed_at"]`을 직접 채워야 함). `other_score_keys`에 임의 metadata 필드(예: `access_count`)를 지정하면 그 값이 점수에 가산되어 "많이 참조된 chunk 가중치" 같은 로직도 구현 가능
 - **알려진 이슈**: Chroma는 metadata에 `datetime` 객체 저장 불가(str/int/float/bool/list만 허용) → TimeWeightedVectorStoreRetriever는 `FAISS`(빈 `faiss.IndexFlatL2` + `InMemoryDocstore`)를 사용. `langchain_core.InMemoryVectorStore`는 `_select_relevance_score_fn` 미구현이라 이 retriever와 호환 안 됨. `SelfQueryRetriever.from_llm()`은 translator 자동 감지 시 모든 벡터스토어용 translator를 일괄 import하는데 `langchain-community` 버전에 따라 일부(Databricks) import가 깨질 수 있음 → `structured_query_translator=ChromaTranslator()`로 명시해 우회
+- **EnsembleRetriever** — Sparse Retriever(키워드 매칭, `BM25Retriever`, `rank_bm25` 패키지 필요)와 Dense Retriever(의미 임베딩, Chroma 등)를 함께 사용해 결과를 순위 결합. `BM25Retriever`는 vectorstore가 아니라 원문 텍스트 리스트로 자체 인덱스를 구성하므로, 기존 vectorstore를 재사용하려면 `vectorstore.get()`으로 원문을 꺼내와야 함 (`rag_vectorstore.py`가 id 없이 중복 저장한 이력이 있어 dedupe 필요)
+- **LongContextReorder** — "Lost in the Middle" 현상(LLM이 긴 컨텍스트의 중간 부분 정보를 잘 놓침) 대응. 관련도 내림차순 문서를 받아 관련도 높은 문서를 리스트의 맨 앞/맨 뒤로 번갈아 재배치하고 낮은 문서를 중간으로 밀어냄. 검색 결과가 많을 때(k=5~10개 이상), 특히 Stuff 방식처럼 전체를 이어붙여 LLM에 전달할 때 효과적
 
 ### SQL Agent (`sql_agnet.py`)
 

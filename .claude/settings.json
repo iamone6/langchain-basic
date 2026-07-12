@@ -7,7 +7,8 @@
       "Bash(.venv/bin/pip uninstall *)",
       "Bash(poetry add *)",
       "Bash(poetry run python rag_vectorstore.py > /tmp/run1.log 2>&1; echo \"run1 done\" *)",
-      "Bash(git -C /home/iamone/src/langchain-basic diff .claude/settings.json rag_vectorstore.py)"
+      "Bash(git -C /home/iamone/src/langchain-basic diff .claude/settings.json rag_vectorstore.py)",
+      "Bash(git -C /home/iamone/src/langchain-basic commit -m ' *)"
     ],
     "additionalDirectories": [
       "/tmp"
