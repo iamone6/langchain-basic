@@ -33,6 +33,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 | `rag-document-loaders.py` | 다양한 포맷의 문서 로딩 예제 |
 | `rag_load_various_file_format.py` | docx/pdf/xlsx/txt/web url 로딩 예제 (포맷별 로딩 방식 정리) |
 | `rag_chunking.py` | 문서 청킹 예제 (글자 수 기준, 토큰 수 기준) |
+| `rag_chunking_advance.py` | 청킹 고급 기법 4종(코드/Markdown Header/Semantic Chunking 등) 예제 |
 | `rag_embedding.py` | HuggingFace 임베딩 생성 및 코사인 유사도 계산 예제 |
 | `rag_vectorstore.py` | Chroma/FAISS 벡터스토어 저장·검색 예제 |
 | `rag_retrieval.py` | 컨텍스트 체인 4종(Stuff/Map Reduce/Refine/Map Rerank) 예제 |
@@ -87,6 +88,13 @@ RAG 파이프라인: `DocumentLoaders → TextSplitters → Embedding → Vector
 - 코드/HTML/LaTeX 등은 `Language` enum을 추가 지정하여 분할 (ex: `language=Language.PYTHON`)
 - `enums/chunk_type.py`의 `ChunkType` enum으로 분할 방식(NORMAL/RECURSIVE/TOKEN) 선택
 - 모듈 레벨 실행 코드는 `if __name__ == "__main__":` 으로 감싸 다른 파일에서 import 시 중복 실행 방지
+
+### RAG Chunking 고급 기법 (`rag_chunking_advance.py`)
+
+- **RecursiveCharacterTextSplitter** — 계층적 구분자(문단→줄바꿈→문장→단어)를 순차 적용, 범용적으로 가장 많이 사용
+- **코드 청킹** — `RecursiveCharacterTextSplitter.from_language(language=Language.PYTHON, ...)`로 클래스/함수 경계를 우선 존중하여 분할
+- **MarkdownHeaderTextSplitter** — `#`/`##`/`###` 헤더 계층으로 분할, 각 청크 metadata에 상위 헤더 경로가 자동으로 채워짐 (`headers_to_split_on=[("#", "h1"), ...]`)
+- **SemanticChunker** — 고정 길이가 아니라 문장을 임베딩해 인접 문장 간 의미 차이가 큰 지점을 경계로 분할. `langchain_experimental` 패키지 필요(`poetry add langchain-experimental`, Python 3.14 지원됨). 청킹 시점에 임베딩 호출이 필요해 비용/속도 부담이 있음 (예제에서는 원문 앞부분만 사용)
 
 ### RAG Embedding (`rag_embedding.py`)
 
