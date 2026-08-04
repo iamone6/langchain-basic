@@ -40,7 +40,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ## 학습 파일 구성
 
-### 1️⃣ **LangChain 기본** (`main.py`)
+### 1. **LangChain 기본** (`main.py`)
 
 **목표**: LangChain의 핵심 API와 LCEL(LangChain Expression Language) 마스터
 
@@ -54,7 +54,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### 2️⃣ **RAG 문서 로딩** (`rag-document-loaders.py`, `rag_load_various_file_format.py`)
+### 2. **RAG 문서 로딩** (`rag-document-loaders.py`, `rag_load_various_file_format.py`)
 
 **목표**: 다양한 파일 형식을 문서로 변환하는 방법 숙달
 
@@ -71,7 +71,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### 3️⃣ **RAG 청킹 기법** (`rag_chunking.py`)
+### 3. **RAG 청킹 기법** (`rag_chunking.py`)
 
 **목표**: 텍스트 분할 방식의 장단점 이해 및 선택
 
@@ -89,7 +89,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### 4️⃣ **RAG 청킹 고급 기법** (`rag_chunking_advance.py`)
+### 4. **RAG 청킹 고급 기법** (`rag_chunking_advance.py`)
 
 **목표**: 데이터 유형별 최적화된 청킹 전략 습득
 
@@ -114,7 +114,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### 5️⃣ **RAG 임베딩** (`rag_embedding.py`)
+### 5. **RAG 임베딩** (`rag_embedding.py`)
 
 **목표**: 벡터 표현을 통한 의미론적 검색 구현
 
@@ -130,7 +130,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### 6️⃣ **RAG 벡터스토어** (`rag_vectorstore.py`)
+### 6. **RAG 벡터스토어** (`rag_vectorstore.py`)
 
 **목표**: 임베딩된 문서의 저장 및 검색 최적화
 
@@ -152,7 +152,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### 7️⃣ **RAG 컨텍스트 체인** (`rag_retrieval.py`)
+### 7. **RAG 컨텍스트 체인** (`rag_retrieval.py`)
 
 **목표**: 검색 결과를 활용한 4가지 답변 생성 방식 비교
 
@@ -180,7 +180,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### 8️⃣ **Retriever 고급 기법** (`rag_retriever_advance_*.py`)
+### 8. **Retriever 고급 기법** (`rag_retriever_advance_*.py`)
 
 **목표**: 검색 정확도와 효율성 극대화
 
@@ -219,7 +219,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### 9️⃣ **SQL Agent** (`sql_agnet.py`)
+### 9. **SQL Agent** (`sql_agent.py`)
 
 **목표**: 자연언어로 SQL 쿼리 생성 및 실행
 
@@ -241,7 +241,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### 🔧 **공용 유틸** (`utils.py`)
+### 10. **공용 유틸** (`utils.py`)
 
 **포함 기능**:
 - **토큰 카운터**: `tiktoken` 기반 Claude 토큰 추정
@@ -252,13 +252,13 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ## 주요 학습 성과
 
-✅ **LangChain LCEL** — 체인 구성의 함수형 패러다임 이해  
-✅ **RAG 파이프라인** — 문서 로딩부터 최종 답변까지 end-to-end 구현  
-✅ **다양한 청킹 기법** — 데이터 유형별 최적화 전략  
-✅ **벡터 검색** — 의미론적 유사도 기반 정보 검색  
-✅ **고급 Retriever** — 성능 향상을 위한 6가지 기법  
-✅ **LLM Agent** — 자연언어 SQL 생성과 자동 오류 수정  
-✅ **프롬프트 엔지니어링** — few-shot, 구조화 출력, 역할 지정  
+- **LangChain LCEL** — 체인 구성의 함수형 패러다임 이해
+- **RAG 파이프라인** — 문서 로딩부터 최종 답변까지 end-to-end 구현
+- **다양한 청킹 기법** — 데이터 유형별 최적화 전략
+- **벡터 검색** — 의미론적 유사도 기반 정보 검색
+- **고급 Retriever** — 성능 향상을 위한 6가지 기법
+- **LLM Agent** — 자연언어 SQL 생성과 자동 오류 수정
+- **프롬프트 엔지니어링** — few-shot, 구조화 출력, 역할 지정  
 
 ---
 
